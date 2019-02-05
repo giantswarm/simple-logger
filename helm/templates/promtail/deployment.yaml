@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "promtail.fullname" . }}
+  labels:
+    app: {{ template "promtail.name" . }}
+    chart: {{ template "promtail.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "promtail.name" . }}
+      release: {{ .Release.Name }}
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ template "promtail.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "promtail.serviceAccountName" . }}
+      containers:
+        - name: promtail-sidecar
+          image: jgsqware/promtail-sidecar:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: shared-data
+              mountPath: {{ .Values.sidecar.logfile.path}}
+          env:
+          - name: SIDECAR_LOGFILE_PATH
+            value: {{ .Values.sidecar.logfile.path}}/{{ .Values.sidecar.logfile.filename}}
+
+        - name: promtail
+          image: "{{ .Values.promtail.image.repository }}:{{ .Values.promtail.image.tag }}"
+          imagePullPolicy: Always
+          args: 
+            - "-config.file=/etc/promtail/promtail.yaml"
+            - "-client.url=http://{{ .Values.loki.service.name }}:{{ .Values.loki.service.port }}/api/prom/push"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/promtail
+            - name: shared-data
+              mountPath: {{ .Values.sidecar.logfile.path}}
+          env:
+          - name: HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          ports:
+            - containerPort: 80
+              name: http-metrics
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "promtail.fullname" . }}
+        - name: shared-data
+          emptyDir: {}

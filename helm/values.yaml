@@ -1,0 +1,35 @@
+rbac:
+  create: true
+  pspEnabled: true
+
+serviceAccount:
+  create: true
+  name: 
+
+loki:
+  service:
+    name: loki
+    port: 3100
+
+promtail:
+  nameOverride: promtail
+  replicas: 1
+  deploymentStrategy: RollingUpdate
+
+  image:
+    repository: grafana/promtail
+    tag: master 
+
+  service:
+    port: 3100
+    annotations: {}
+    labels: {}
+  
+
+sidecar:
+  logfile:
+    path: /home/slog
+    filename: creator.log
+  labels:
+    job: promtail-sidecar
+    test: golang
