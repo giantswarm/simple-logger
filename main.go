@@ -41,7 +41,9 @@ func init() {
 }
 
 func main() {
-	if len(os.Args) > 1 && os.Args[1] == "version" {
+
+	if len(os.Args) > 1 && (os.Args[1] == "version" || os.Args[1] == "--help") {
+
 		fmt.Println("Simple Logger for Promtail demo")
 		os.Exit(0)
 	}
