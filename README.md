@@ -27,6 +27,6 @@ sidecar:
     filename: creator.log
   labels:
     job: promtail-sidecar
-    test: golang
+    test: golang 
 ```
 
