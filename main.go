@@ -41,6 +41,11 @@ func init() {
 }
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "version" {
+		fmt.Println("Simple Logger for Promtail demo")
+		os.Exit(0)
+	}
+
 	fmt.Println("Simple log creator")
 
 	i := 0
