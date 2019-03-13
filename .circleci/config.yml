@@ -1,0 +1,11 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    steps:
+    - checkout
+    - deploy:
+        command: |
+          if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            ./architect deploy
+          fi
